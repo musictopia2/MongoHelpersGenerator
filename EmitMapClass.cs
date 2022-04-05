@@ -175,6 +175,20 @@ internal class EmitMapClass
                     .Write(property.Name)
                      .Write(" { get; set; }");
                 }
+                else if (property.Type.IsCollection())
+                {
+                    //i don't think i need a list of a list.
+                    INamedTypeSymbol firsts = (INamedTypeSymbol) property.Type;
+                    var seconds = property.Type.GetSingleGenericTypeUsed();
+                    INamedTypeSymbol fins = (INamedTypeSymbol)seconds!;
+                    w.Write("public ")
+                    .SymbolFullNameWrite(firsts)
+                    .Write("<")
+                    .SymbolFullNameWrite(fins)
+                    .Write("> ")
+                    .Write(property.Name)
+                     .Write(" { get; set; } = new();");
+                }
                 else if (property.Type.IsSimpleType())
                 {
                     w.Write("public ")

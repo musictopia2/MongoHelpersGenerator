@@ -32,12 +32,21 @@ internal class MultipleCollectionGenerator : IIncrementalGenerator
     }
     private void Execute(Compilation compilation, ImmutableArray<CustomSymbol> list, SourceProductionContext context)
     {
-        var others = list.Distinct();
-        ParserClass parses = new(compilation);
-        var results = parses.GetMultipleCollectionResults(others);
-        EmitMapClass emitmap = new(results, compilation, context);
-        emitmap.Emit();
-        EmitMultipleClass emitsfinal = new(results, compilation, context);
-        emitsfinal.Emit();
+        try
+        {
+            var others = list.Distinct();
+            ParserClass parses = new(compilation);
+            var results = parses.GetMultipleCollectionResults(others);
+            EmitMapClass emitmap = new(results, compilation, context);
+            emitmap.Emit();
+            EmitMultipleClass emitsfinal = new(results, compilation, context);
+            emitsfinal.Emit();
+        }
+        catch (Exception)
+        {
+
+            
+        }
+        
     }
 }

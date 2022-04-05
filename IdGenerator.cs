@@ -34,23 +34,32 @@ public class IdGenerator : IIncrementalGenerator
     }
     private void Execute(ImmutableArray<CustomSymbol> list, SourceProductionContext context)
     {
-        foreach (var item in list)
+        try
         {
-            if (item.PartialClass == false)
+            foreach (var item in list)
             {
-                context.ReportPartialClassRequired(item.Symbol);
-                continue;
+                if (item.PartialClass == false)
+                {
+                    context.ReportPartialClassRequired(item.Symbol);
+                    continue;
+                }
+                SourceCodeStringBuilder builder = new();
+                builder.StartPartialClassImplements(item.Symbol, w =>
+                {
+                    w.Write(" : global::CommonBasicLibraries.NoSqlHelpers.Interfaces.INoSqlModel");
+                }, w =>
+                {
+                    ProcessClass(w, item.Symbol);
+                });
+                context.AddSource($"{item.Symbol.Name}mongo.g", builder.ToString());
             }
-            SourceCodeStringBuilder builder = new();
-            builder.StartPartialClassImplements(item.Symbol, w =>
-            {
-                w.Write(" : global::CommonBasicLibraries.NoSqlHelpers.Interfaces.INoSqlModel");
-            }, w =>
-            {
-                ProcessClass(w, item.Symbol);
-            });
-            context.AddSource($"{item.Symbol.Name}mongo.g", builder.ToString());
         }
+        catch (Exception)
+        {
+
+            
+        }
+        
     }
     private void ProcessClass(ICodeBlock w, INamedTypeSymbol symbol)
     {

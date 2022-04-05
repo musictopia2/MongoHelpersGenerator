@@ -32,12 +32,22 @@ internal class SingleCollectionGenerator : IIncrementalGenerator
     }
     private void Execute(Compilation compilation, ImmutableArray<CustomSymbol> list, SourceProductionContext context)
     {
-        var others = list.Distinct();
-        ParserClass parses = new(compilation);
-        var results = parses.GetSingleCollectionResults(others);
-        EmitMapClass emitmap = new(results, compilation, context);
-        emitmap.Emit();
-        EmitSingleClass emitsfinal = new(results, compilation, context);
-        emitsfinal.Emit();
+        
+        try
+        {
+            var others = list.Distinct();
+            ParserClass parses = new(compilation);
+            var results = parses.GetSingleCollectionResults(others);
+            EmitMapClass emitmap = new(results, compilation, context);
+            emitmap.Emit();
+            EmitSingleClass emitsfinal = new(results, compilation, context);
+            emitsfinal.Emit();
+        }
+        catch (Exception)
+        {
+            //try to make it ignore errors.  so i don't have to reload visual studio as much.
+
+        }
+
     }
 }
