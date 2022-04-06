@@ -164,23 +164,28 @@ internal static class DataSingleAccessExtensions
         });
         return w;
     }
+    //await DeleteRecordAsync(record);
+    //await InsertRecordAsync(record);
     public static ICodeBlock PopulateSingleRecordMethods(this ICodeBlock w)
     {
-        w.PopulateRecordMethod("InsertRecordAsync", _compilation!, _item!.SingleCollection, EnumDatabaseCategory.SingleCollection, w =>
+        w.PopulateRecordMethod("InsertRecordAsync", _compilation!, _item!.SingleCollection, EnumDatabaseCategory.SingleCollection, true, w =>
         {
             w.WriteLine("return firsts.InsertOneAsync(output);");
         })
-        .PopulateRecordMethod("UpsertRecordAsync", _compilation!, _item!.SingleCollection, EnumDatabaseCategory.SingleCollection, w =>
+        .PopulateRecordMethod("UpsertRecordAsync", _compilation!, _item!.SingleCollection, EnumDatabaseCategory.SingleCollection, false, w =>
         {
-            w.WriteFilter("output.Id")
-            .WriteLine(w =>
-            {
-                w.Write("return firsts.ReplaceOneAsync(filters, output, new ")
-                .PopulateMongoDriver()
-                .Write("ReplaceOptions { IsUpsert = true });");
-            });
+            //w.WriteFilter("output.Id")
+            w.WriteLine("await DeleteRecordAsync(record);")
+            .WriteLine("await InsertRecordAsync(record);");
+            //.WriteLine(w =>
+            //{
+
+            //    w.Write("return firsts.ReplaceOneAsync(filters, output, new ")
+            //    .PopulateMongoDriver()
+            //    .Write("ReplaceOptions { IsUpsert = true });");
+            //});
         })
-        .PopulateRecordMethod("DeleteRecordAsync", _compilation!, _item!.SingleCollection, EnumDatabaseCategory.SingleCollection, w =>
+        .PopulateRecordMethod("DeleteRecordAsync", _compilation!, _item!.SingleCollection, EnumDatabaseCategory.SingleCollection, true, w =>
         {
             w.WriteLine(w =>
             {

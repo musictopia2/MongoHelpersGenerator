@@ -245,21 +245,24 @@ internal static class DataMultiAccessExtensions
     {
         foreach (var c in _item!.Collections)
         {
-            w.PopulateRecordMethod("InsertRecordAsync", _compilation!, c!, EnumDatabaseCategory.ManyCollections, w =>
+            w.PopulateRecordMethod("InsertRecordAsync", _compilation!, c!, EnumDatabaseCategory.ManyCollections, true, w =>
             {
                 w.WriteLine("return firsts.InsertOneAsync(output);");
             })
-           .PopulateRecordMethod("UpsertRecordAsync", _compilation!, c!, EnumDatabaseCategory.ManyCollections, w =>
+           .PopulateRecordMethod("UpsertRecordAsync", _compilation!, c!, EnumDatabaseCategory.ManyCollections, false, w =>
            {
-               w.WriteFilter(c!, "output.Id")
-               .WriteLine(w =>
-               {
-                   w.Write("return firsts.ReplaceOneAsync(filters, output, new ")
-                   .PopulateMongoDriver()
-                   .Write("ReplaceOptions { IsUpsert = true });");
-               });
+               //w.WriteFilter(c!, "output.Id")
+              w.WriteLine("await DeleteRecordAsync(record);")
+              .WriteLine("await InsertRecordAsync(record);");
+               //.WriteLine(w =>
+               //{
+
+               //    w.Write("return firsts.ReplaceOneAsync(filters, output, new ")
+               //    .PopulateMongoDriver()
+               //    .Write("ReplaceOptions { IsUpsert = true });");
+               //});
            })
-           .PopulateRecordMethod("DeleteRecordAsync", _compilation!, c!, EnumDatabaseCategory.ManyCollections, w =>
+           .PopulateRecordMethod("DeleteRecordAsync", _compilation!, c!, EnumDatabaseCategory.ManyCollections, true, w =>
            {
                w.WriteLine(w =>
                {

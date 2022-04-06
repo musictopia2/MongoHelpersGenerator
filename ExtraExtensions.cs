@@ -81,17 +81,27 @@ internal static class ExtraExtensions
             .Write(" record)");
         return w;
     }
-    public static ICodeBlock PopulateRecordMethod(this ICodeBlock w, string methodName, Compilation compilation, CollectionInfo information, EnumDatabaseCategory category, Action<ICodeBlock> action)
+    public static ICodeBlock PopulateRecordMethod(this ICodeBlock w, string methodName, Compilation compilation, CollectionInfo information, EnumDatabaseCategory category, bool needsFirst, Action<ICodeBlock> action)
     {
         w.WriteLine(w =>
         {
-            w.Write("internal Task ")
-            .Write(methodName)
+            if (needsFirst == false)
+            {
+                w.Write("internal async Task ");
+            }
+            else
+            {
+                w.Write("internal Task ");
+            }
+            w.Write(methodName)
             .PopulateRecord(information);
         })
         .WriteCodeBlock(w =>
         {
-            w.MapMongo(compilation, information, category);
+            if (needsFirst)
+            {
+                w.MapMongo(compilation, information, category);
+            }
             action.Invoke(w);
         });
         return w;
