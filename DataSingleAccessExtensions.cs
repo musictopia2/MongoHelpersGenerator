@@ -170,7 +170,8 @@ internal static class DataSingleAccessExtensions
     {
         w.PopulateRecordMethod("InsertRecordAsync", _compilation!, _item!.SingleCollection, EnumDatabaseCategory.SingleCollection, true, w =>
         {
-            w.WriteLine("return firsts.InsertOneAsync(output);");
+            w.WriteLine("await firsts.InsertOneAsync(output);")
+            .WriteLine("record.Id = output.Id;");
         })
         .PopulateRecordMethod("UpsertRecordAsync", _compilation!, _item!.SingleCollection, EnumDatabaseCategory.SingleCollection, false, w =>
         {

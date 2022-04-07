@@ -14,7 +14,7 @@ internal class EmitSingleClass
     {
         foreach (var item in _list)
         {
-            if (item.HasPartial == false)
+            if (item.HasPartial == false || item.HasId == false)
             {
                 continue; //because already handled.
             }

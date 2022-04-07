@@ -2,6 +2,7 @@
 [Generator]
 internal class SingleCollectionGenerator : IIncrementalGenerator
 {
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         IncrementalValuesProvider<CustomSymbol> declares = context.SyntaxProvider.CreateSyntaxProvider(

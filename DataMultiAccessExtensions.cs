@@ -247,7 +247,8 @@ internal static class DataMultiAccessExtensions
         {
             w.PopulateRecordMethod("InsertRecordAsync", _compilation!, c!, EnumDatabaseCategory.ManyCollections, true, w =>
             {
-                w.WriteLine("return firsts.InsertOneAsync(output);");
+                w.WriteLine("await firsts.InsertOneAsync(output);")
+                .WriteLine("record.Id = output.Id;");
             })
            .PopulateRecordMethod("UpsertRecordAsync", _compilation!, c!, EnumDatabaseCategory.ManyCollections, false, w =>
            {

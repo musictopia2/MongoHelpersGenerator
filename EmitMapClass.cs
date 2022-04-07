@@ -21,6 +21,11 @@ internal class EmitMapClass
             }
             foreach (var c in item.Collections)
             {
+                if (c.HasId == false)
+                {
+                    _context.ReportIdRequired(c.Symbol!);
+                    continue;
+                }
                 if (c.Catgegory == EnumModelCategory.None)
                 {
                     SourceCodeStringBuilder builder = new();
@@ -42,7 +47,7 @@ internal class EmitMapClass
         {
             foreach (var item in _list)
             {
-                if (item.HasPartial == false)
+                if (item.HasPartial == false || item.HasId == false)
                 {
                     continue;
                 }

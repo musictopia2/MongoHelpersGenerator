@@ -8,4 +8,5 @@ internal class FirstInformation
     public bool HasPartial { get; set; }
     public bool HasConnectionString { get; set; }
     public CollectionInfo SingleCollection => Collections.Single(); //if there is not single, will raise error.
+    public bool HasId { get; set; }
 }

@@ -54,6 +54,9 @@ internal class ParserClass
         CollectionInfo other = new();
         other.Symbol = GetModelSymbol(custom.Symbol);
         other.Catgegory = GetModelCategory(other.Symbol);
+        var list = other.Symbol.GetAllPublicProperties();
+        other.HasId = list.Any(x => x.Name == "Id");
+        output.HasId = other.HasId;
         output.Collections.Add(other);
         if (other.Catgegory == EnumModelCategory.None)
         {
@@ -80,8 +83,11 @@ internal class ParserClass
             collection.Symbol = makeType;
             collection.Name = ParseUtils.GetStringContent(make);
             collection.Catgegory = GetModelCategory(makeType);
+            var list = collection.Symbol.GetAllPublicProperties();
+            collection.HasId = list.Any(x => x.Name == "Id");
             output.Collections.Add(collection);
         }
+        output.HasId = output.Collections.All(x => x.HasId);
         return output;
     }
     private EnumModelCategory GetModelCategory(INamedTypeSymbol symbol)

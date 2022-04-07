@@ -1,6 +1,18 @@
 ﻿namespace MongoHelpersGenerator;
 internal static class ExtraExtensions
 {
+    public static void ReportIdRequired(this SourceProductionContext context, INamedTypeSymbol symbol)
+    {
+        string message = $"Id property was required.  The class name was {symbol.Name}";
+        context.ReportDiagnostic(Diagnostic.Create(message.ReportCustomError("IdRequired"), Location.None));
+    }
+    private static DiagnosticDescriptor ReportCustomError(this string errorMessage, string id) => new(id,
+        "Could not create source generation",
+        errorMessage,
+        "Error",
+        DiagnosticSeverity.Error,
+        true
+        );
     public static void StartCreatingNewModel(this SourceCodeStringBuilder builder, Compilation compilation, INamedTypeSymbol oldModel, Action<ICodeBlock> action)
     {
         string ns = compilation.AssemblyName!;
@@ -85,7 +97,7 @@ internal static class ExtraExtensions
     {
         w.WriteLine(w =>
         {
-            if (needsFirst == false)
+            if (needsFirst == false || methodName == "InsertRecordAsync")
             {
                 w.Write("internal async Task ");
             }
