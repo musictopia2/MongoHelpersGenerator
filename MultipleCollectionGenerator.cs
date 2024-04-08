@@ -4,20 +4,38 @@ internal class MultipleCollectionGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        IncrementalValuesProvider<CustomSymbol> declares = context.SyntaxProvider.CreateSyntaxProvider(
+        //step 1
+        IncrementalValuesProvider<CustomSymbol> declares1 = context.SyntaxProvider.CreateSyntaxProvider(
             (s, _) => IsSyntaxTarget(s),
             (t, _) => GetTarget(t))
             .Where(m => m != null)!;
-        IncrementalValueProvider<(Compilation, ImmutableArray<CustomSymbol>)> compilation
-            = context.CompilationProvider.Combine(declares.Collect());
-        context.RegisterSourceOutput(compilation, (spc, source) =>
+
+
+        //step 2
+        var declares2 = context.CompilationProvider.Combine(declares1.Collect());
+
+        //step 3
+        var declares3 = declares2.SelectMany(static (x, _) =>
         {
-            Execute(source.Item1, source.Item2, spc);
+            ImmutableHashSet<CustomSymbol> start = x.Right.ToImmutableHashSet();
+            return GetResults(start, x.Left);
+        });
+        //step 4
+        var declares4 = context.CompilationProvider.Combine(declares3.Collect());
+        context.RegisterSourceOutput(declares4, (spc, source) =>
+        {
+            Execute(source.Left, source.Right, spc);
         });
     }
     private bool IsSyntaxTarget(SyntaxNode syntax)
     {
         return syntax is ClassDeclarationSyntax;
+    }
+    private static ImmutableHashSet<FirstInformation> GetResults(ImmutableHashSet<CustomSymbol> others, Compilation compilation)
+    {
+        ParserClass parses = new(compilation);
+        var results = parses.GetMultipleCollectionResults(others);
+        return results.ToImmutableHashSet();
     }
     private CustomSymbol? GetTarget(GeneratorSyntaxContext context)
     {
@@ -30,23 +48,12 @@ internal class MultipleCollectionGenerator : IIncrementalGenerator
         }
         return null;
     }
-    private void Execute(Compilation compilation, ImmutableArray<CustomSymbol> list, SourceProductionContext context)
-    {
-        try
-        {
-            var others = list.Distinct();
-            ParserClass parses = new(compilation);
-            var results = parses.GetMultipleCollectionResults(others);
-            EmitMapClass emitmap = new(results, compilation, context);
-            emitmap.Emit();
-            EmitMultipleClass emitsfinal = new(results, compilation, context);
-            emitsfinal.Emit();
-        }
-        catch (Exception)
-        {
 
-            
-        }
-        
+    private void Execute(Compilation compilation, ImmutableArray<FirstInformation> list, SourceProductionContext context)
+    {
+        EmitMapClass emitmap = new(list, compilation, context);
+        emitmap.Emit();
+        EmitMultipleClass emitsfinal = new(list, compilation, context);
+        emitsfinal.Emit();
     }
 }

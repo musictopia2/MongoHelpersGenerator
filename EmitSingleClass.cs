@@ -1,18 +1,9 @@
 ﻿namespace MongoHelpersGenerator;
-internal class EmitSingleClass
+internal class EmitSingleClass(ImmutableArray<FirstInformation> list, Compilation compilation, SourceProductionContext context)
 {
-    private readonly BasicList<FirstInformation> _list;
-    private readonly Compilation _compilation;
-    private readonly SourceProductionContext _context;
-    public EmitSingleClass(BasicList<FirstInformation> list, Compilation compilation, SourceProductionContext context)
-    {
-        _list = list;
-        _compilation = compilation;
-        _context = context;
-    }
     public void Emit()
     {
-        foreach (var item in _list)
+        foreach (var item in list)
         {
             if (item.HasPartial == false || item.HasId == false)
             {
@@ -26,7 +17,7 @@ internal class EmitSingleClass
         SourceCodeStringBuilder builder = new();
         builder.StartPartialClass(item.MainSymbol!, w =>
         {
-            _compilation.StartSingleUp(item);
+            compilation.StartSingleUp(item);
             w.CreateSinglePrivateHelpersClass()
             .PopulateSingleImplementCollection()
             .PopulateSingleGetCollection()
@@ -36,6 +27,6 @@ internal class EmitSingleClass
             .PopulateSingleRedoCollection()
             .PopulateSingleRecordById();
         });
-        _context.AddSource($"{item.MainSymbol!.Name}.DataAccess.g", builder.ToString());
+        context.AddSource($"{item.MainSymbol!.Name}.DataAccess.g", builder.ToString());
     }
 }

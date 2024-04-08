@@ -1,39 +1,30 @@
 ﻿namespace MongoHelpersGenerator;
-internal class EmitMapClass
+internal class EmitMapClass(ImmutableArray<FirstInformation> list, Compilation compilation, SourceProductionContext context)
 {
-    private readonly BasicList<FirstInformation> _list;
-    private readonly Compilation _compilation;
-    private readonly SourceProductionContext _context;
-    public EmitMapClass(BasicList<FirstInformation> list, Compilation compilation, SourceProductionContext context)
-    {
-        _list = list;
-        _compilation = compilation;
-        _context = context;
-    }
     public void Emit()
     {
-        foreach (var item in _list)
+        foreach (var item in list)
         {
             if (item.HasPartial == false)
             {
-                _context.ReportPartialClassRequired(item.MainSymbol!);
+                context.ReportPartialClassRequired(item.MainSymbol!);
                 continue;
             }
             foreach (var c in item.Collections)
             {
                 if (c.HasId == false)
                 {
-                    _context.ReportIdRequired(c.Symbol!);
+                    context.ReportIdRequired(c.Symbol!);
                     continue;
                 }
                 if (c.Catgegory == EnumModelCategory.None)
                 {
                     SourceCodeStringBuilder builder = new();
-                    builder.StartCreatingNewModel(_compilation, c.Symbol!, w =>
+                    builder.StartCreatingNewModel(compilation, c.Symbol!, w =>
                     {
                         FinishModel(w, c.Symbol!);
                     });
-                    _context.AddSource($"{c.Symbol!.Name}.Mongo.g", builder.ToString());
+                    context.AddSource($"{c.Symbol!.Name}.Mongo.g", builder.ToString());
                 }
             }
         }
@@ -43,9 +34,9 @@ internal class EmitMapClass
     private void MappingExtensions()
     {
         SourceCodeStringBuilder builder = new();
-        builder.StartInternalGlobalProcesses(_compilation, "MongoMappingExtensions", w =>
+        builder.StartInternalGlobalProcesses(compilation, "MongoMappingExtensions", w =>
         {
-            foreach (var item in _list)
+            foreach (var item in list)
             {
                 if (item.HasPartial == false || item.HasId == false)
                 {
@@ -62,7 +53,7 @@ internal class EmitMapClass
                 }
             }
         });
-        _context.AddSource("mongomappings.g", builder.ToString());
+        context.AddSource("mongomappings.g", builder.ToString());
     }
     private void MapList(ICodeBlock w, INamedTypeSymbol symbol)
     {
@@ -75,7 +66,7 @@ internal class EmitMapClass
             .Write("> MapMongo(this ")
             .BasicListWrite()
             .Write("<")
-            .PopulateMongoModel(_compilation, symbol.Name)
+            .PopulateMongoModel(compilation, symbol.Name)
             .Write("> list)");
         })
         .WriteCodeBlock(w =>
@@ -100,7 +91,7 @@ internal class EmitMapClass
         w.WriteLine(w =>
         {
             w.Write("public static ")
-            .PopulateMongoModel(_compilation, symbol.Name)
+            .PopulateMongoModel(compilation, symbol.Name)
             .Write(" MapMongo(this ")
             .SymbolFullNameWrite(symbol)
             .Write(" model)");
@@ -109,7 +100,7 @@ internal class EmitMapClass
         {
             w.WriteLine(w =>
             {
-                w.PopulateMongoModel(_compilation, symbol.Name)
+                w.PopulateMongoModel(compilation, symbol.Name)
                 .Write(" output = new();");
             });
             FinishMapping(w, symbol);
@@ -123,7 +114,7 @@ internal class EmitMapClass
             w.Write("public static ")
             .SymbolFullNameWrite(symbol)
             .Write(" MapMongo(this ")
-            .PopulateMongoModel(_compilation, symbol.Name)
+            .PopulateMongoModel(compilation, symbol.Name)
             .Write(" model)");
         })
         .WriteCodeBlock(w =>

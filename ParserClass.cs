@@ -1,15 +1,10 @@
 ﻿namespace MongoHelpersGenerator;
-internal class ParserClass
+internal class ParserClass(Compilation compilation)
 {
-    private readonly Compilation _compilation;
     public const string MongoAttribute = "UseMongoAttribute";
-    public ParserClass(Compilation compilation)
-    {
-        _compilation = compilation;
-    }
     public BasicList<FirstInformation> GetSingleCollectionResults(IEnumerable<CustomSymbol> list)
     {
-        BasicList<FirstInformation> output = new();
+        BasicList<FirstInformation> output = [];
         foreach (CustomSymbol symbol in list)
         {
             output.Add(GetSingleInfo(symbol));
@@ -18,7 +13,7 @@ internal class ParserClass
     }
     public BasicList<FirstInformation> GetMultipleCollectionResults(IEnumerable<CustomSymbol> list)
     {
-        BasicList<FirstInformation> output = new();
+        BasicList<FirstInformation> output = [];
         foreach (var item in list)
         {
             output.Add(GetMultipleInfo(item));
@@ -71,7 +66,7 @@ internal class ParserClass
     private FirstInformation GetMultipleInfo(CustomSymbol custom)
     {
         FirstInformation output = new();
-        ParseContext firstParse = new(_compilation, custom.Node);
+        ParseContext firstParse = new(compilation, custom.Node);
         output.HasPartial = custom.Node.IsPartial();
         output.HasConnectionString = custom.Symbol.Implements("INoSqlConnection");
         output.MainSymbol = custom.Symbol;
