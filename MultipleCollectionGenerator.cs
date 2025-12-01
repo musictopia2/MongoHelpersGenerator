@@ -17,7 +17,7 @@ internal class MultipleCollectionGenerator : IIncrementalGenerator
         //step 3
         var declares3 = declares2.SelectMany(static (x, _) =>
         {
-            ImmutableHashSet<CustomSymbol> start = x.Right.ToImmutableHashSet();
+            ImmutableHashSet<CustomSymbol> start = [.. x.Right];
             return GetResults(start, x.Left);
         });
         //step 4
@@ -35,7 +35,7 @@ internal class MultipleCollectionGenerator : IIncrementalGenerator
     {
         ParserClass parses = new(compilation);
         var results = parses.GetMultipleCollectionResults(others);
-        return results.ToImmutableHashSet();
+        return [.. results];
     }
     private CustomSymbol? GetTarget(GeneratorSyntaxContext context)
     {
